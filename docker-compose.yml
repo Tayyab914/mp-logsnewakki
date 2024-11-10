@@ -1,0 +1,247 @@
+# version: '3.8'
+
+# services:
+#   product:
+#     build: ./services/product
+#     ports:
+#       - "5001:5001"
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/ecommerce
+#     depends_on:
+#       - mongodb
+#     networks:
+#       - ecommerce
+#     restart: on-failure
+
+#   order:
+#     build: ./services/order
+#     ports:
+#       - "5002:5002"
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/ecommerce
+#     depends_on:
+#       - mongodb
+#     networks:
+#       - ecommerce
+#     restart: on-failure
+
+#   cart:
+#     build: ./services/cart
+#     ports:
+#       - "5003:5003"
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/ecommerce
+#     depends_on:
+#       - mongodb
+#     networks:
+#       - ecommerce
+#     restart: on-failure
+
+#   auth:
+#     build: ./services/auth
+#     ports:
+#       - "5004:5004"
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/ecommerce
+#     depends_on:
+#       - mongodb
+#     networks:
+#       - ecommerce
+#     restart: on-failure
+
+#   mongodb:
+#     image: mongo
+#     ports:
+#       - "27017:27017"
+#     networks:
+#       - ecommerce
+
+# networks:
+#   ecommerce:
+#     driver: 
+
+
+
+
+# version: '3.8'
+
+# services:
+#   product:
+#     build: ./services/product
+#     ports:
+#       - "5001:5001"
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/ecommerce
+#     networks:
+#       - ecommerce
+#     depends_on:
+#       - mongodb
+#       - fluentd
+#     logging:
+#       driver: "fluentd"
+#       options:
+#         fluentd-address: localhost:24224
+#         tag: product
+#     restart: on-failure
+
+#   mongodb:
+#     image: mongo
+#     ports:
+#       - "27017:27017"
+#     networks:
+#       - ecommerce
+
+#   elasticsearch:
+#     image: elasticsearch:7.3.2
+#     environment:
+#       - discovery.type=single-node
+#       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+#     ports:
+#       - "9200:9200"
+#     networks:
+#       - ecommerce
+
+#   fluentd:
+#     image: fluent/fluentd-kubernetes-daemonset:v1.11.2-debian-elasticsearch7-1.0
+#     ports:
+#       - "24224:24224"
+#       - "24224:24224/udp"
+#     networks:
+#       - ecommerce
+#     depends_on:
+#       - elasticsearch
+#     volumes:
+#       - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
+#       - /var/log:/var/log
+
+#   kibana:
+#     image: kibana:7.3.2
+#     environment:
+#       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#     ports:
+#       - "5601:5601"
+#     networks:
+#       - ecommerce
+
+# networks:
+#   ecommerce:
+#     driver: bridge
+
+
+version: '3.8'
+
+services:
+  product:
+    build: ./services/product
+    ports:
+      - "5001:5001"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ecommerce
+    depends_on:
+      - mongodb
+      - fluentd
+    networks:
+      - ecommerce
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224  # Change localhost to fluentd container name
+        tag: product
+    restart: on-failure
+
+  order:
+    build: ./services/order
+    ports:
+      - "5002:5002"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ecommerce
+    depends_on:
+      - mongodb
+      - fluentd
+    networks:
+      - ecommerce
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: order
+    restart: on-failure
+
+  cart:
+    build: ./services/cart
+    ports:
+      - "5003:5003"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ecommerce
+    depends_on:
+      - mongodb
+      - fluentd
+    networks:
+      - ecommerce
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: cart
+    restart: on-failure
+
+  auth:
+    build: ./services/auth
+    ports:
+      - "5004:5004"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/ecommerce
+    depends_on:
+      - mongodb
+      - fluentd
+    networks:
+      - ecommerce
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: auth
+    restart: on-failure
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - ecommerce
+
+  fluentd:
+    image: fluent/fluentd-kubernetes-daemonset:v1.11.2-debian-elasticsearch7-1.0
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - ecommerce
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf
+      - /var/log:/var/log
+
+  elasticsearch:
+    image: elasticsearch:7.3.2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    networks:
+      - ecommerce
+
+  kibana:
+    image: kibana:7.3.2
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - ecommerce
+
+networks:
+  ecommerce:
+    driver: bridge
