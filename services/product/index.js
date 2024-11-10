@@ -154,6 +154,15 @@
 // app.listen(PORT, () => {
 //   logger.info(`Product service running on port ${PORT}`);
 // });
+
+
+
+
+
+
+
+
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');

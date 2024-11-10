@@ -208,6 +208,11 @@
 // app.listen(PORT, () => {
 //   logger.info(`Cart service running on port ${PORT}`);
 // });
+
+
+
+
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -310,3 +315,4 @@ app.get('/metrics', async (req, res) => {
 app.listen(PORT, () => {
   logger.info(`Cart service running on port ${PORT}`);
 });
+

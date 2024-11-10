@@ -4,7 +4,7 @@ FROM node:18
 WORKDIR /app
 
 # Install required packages directly
-RUN npm install express body-parser jsonwebtoken mongoose cors express-prom-bundle cookie-parser morgan bcrypt winston 
+RUN npm install express body-parser jsonwebtoken mongoose cors express-prom-bundle cookie-parser morgan bcrypt winston winston-mongodb
 
 # Copy the rest of the application code
 COPY . .
